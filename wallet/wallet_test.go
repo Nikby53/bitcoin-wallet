@@ -1,6 +1,7 @@
 package wallet
 
 import (
+	"fmt"
 	"sync"
 	"testing"
 )
@@ -27,7 +28,10 @@ func TestWallet_Deposit(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.wallet.Deposit(tt.deposit)
+			err := tt.wallet.Deposit(tt.deposit)
+			if err != nil {
+				fmt.Println(err)
+			}
 			if tt.wallet.Balance != tt.want {
 				t.Errorf("expected %v of amount intead of %v", tt.want, tt.wallet.Balance)
 			}
@@ -51,7 +55,7 @@ func TestWallet_Withdraw(t *testing.T) {
 		},
 		{
 			wallet:        New("Nikita", 1.00),
-			expectedError: AppError,
+			expectedError: NotEnoughMoneyToWithdraw,
 			withdraw:      2,
 			name:          "fail:not enough money to withdraw",
 			want:          1,
@@ -86,7 +90,7 @@ func TestWallet_WithdrawConcurrent(t *testing.T) {
 		},
 		{
 			wallet:        New("Nikita", 1.00),
-			expectedError: AppError,
+			expectedError: NotEnoughMoneyToWithdraw,
 			withdraw:      2.00,
 			name:          "fail:not enough money to withdraw",
 			want:          1.00,
@@ -133,7 +137,10 @@ func TestWallet_DepositConcurrent(t *testing.T) {
 			for i := 0; i < 3; i++ {
 				wg.Add(1)
 				go func() {
-					tt.wallet.Deposit(tt.deposit)
+					err := tt.wallet.Deposit(tt.deposit)
+					if err != nil {
+						fmt.Println(IncorrectInput)
+					}
 					defer wg.Done()
 				}()
 			}
@@ -158,7 +165,10 @@ func ExampleWallet_Deposit() {
 		},
 	}
 	for _, tt := range tests {
-		tt.wallet.Deposit(tt.deposit)
+		err := tt.wallet.Deposit(tt.deposit)
+		if err != nil {
+			fmt.Println(IncorrectInput)
+		}
 		// Output:
 		// 5.32
 	}
@@ -177,7 +187,10 @@ func ExampleWallet_Withdraw() {
 		},
 	}
 	for _, tt := range tests {
-		tt.wallet.Deposit(tt.withdraw)
+		err := tt.wallet.Withdraw(tt.withdraw)
+		if err != nil {
+			fmt.Println(IncorrectInput)
+		}
 		// Output:
 		// 0.50
 	}
