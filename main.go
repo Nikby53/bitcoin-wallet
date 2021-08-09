@@ -35,7 +35,7 @@ func (w *Wallet) Deposit(amount float64) {
 	w.Balance += Bitcoin(amount)
 }
 
-func (w *Wallet) string() string {
+func (w *Wallet) ShowBalance() string {
 	return fmt.Sprintf("user %v balance is %g bitcoin \n", w.User, w.Balance)
 }
 
@@ -64,7 +64,7 @@ func showMenu(w *Wallet) {
 		}
 		switch input {
 		case 1:
-			fmt.Println(w.string())
+			fmt.Println(w.ShowBalance())
 		case 2:
 			var dep float64
 			fmt.Printf("enter the deposit amount »")
