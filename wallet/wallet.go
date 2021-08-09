@@ -10,7 +10,7 @@ import (
 var NotEnoughMoneyToWithdraw = errors.New("not enough money to withdraw")
 
 // IncorrectInput custom error.
-var IncorrectInput = errors.New("Incorrect input")
+var IncorrectInput = errors.New(" incorrect input")
 
 // Bitcoin type based on float64.
 type Bitcoin float64
