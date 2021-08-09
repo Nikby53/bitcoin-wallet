@@ -6,7 +6,11 @@ import (
 	"sync"
 )
 
-var AppError = errors.New("not enough money to withdraw")
+// NotEnoughMoneyToWithdraw custom error.
+var NotEnoughMoneyToWithdraw = errors.New("not enough money to withdraw")
+
+// IncorrectInput custom error.
+var IncorrectInput = errors.New("Incorrect input")
 
 // Bitcoin type based on float64.
 type Bitcoin float64
@@ -20,7 +24,7 @@ type Wallet struct {
 }
 
 func (b Bitcoin) String() string {
-	return fmt.Sprintf("%g BTC", b)
+	return fmt.Sprintf("%.4f BTC", b)
 }
 
 func (w Wallet) String() string {
@@ -31,25 +35,30 @@ func (w Wallet) String() string {
 func (w *Wallet) Withdraw(amount Bitcoin) error {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
+	if amount <= 0 {
+		return IncorrectInput
+	}
 	if w.Balance-amount < 0 {
-		return AppError
+		return NotEnoughMoneyToWithdraw
 	}
 	w.Balance -= amount
 	return nil
 }
 
 // Deposit method implements deposit realisation.
-func (w *Wallet) Deposit(amount Bitcoin) {
+func (w *Wallet) Deposit(amount Bitcoin) error {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 	if amount <= 0 {
-		fmt.Println("Incorrect input")
-		return
+		return IncorrectInput
 	}
 	fmt.Printf("Depositing %s  \n", amount)
 	w.Balance += amount
+	return nil
 }
 
+// ShowBalance method return String method
+// and shows menu.
 func (w *Wallet) ShowBalance() string {
 	return w.String()
 }
