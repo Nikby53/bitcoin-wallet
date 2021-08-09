@@ -1,7 +1,6 @@
-package main
+package wallet
 
 import (
-	"errors"
 	"sync"
 	"testing"
 )
@@ -9,8 +8,8 @@ import (
 func TestWallet_Deposit(t *testing.T) {
 	tests := []struct {
 		wallet  *Wallet
-		want    float64
-		deposit float64
+		want    Bitcoin
+		deposit Bitcoin
 		name    string
 	}{
 		{
@@ -29,7 +28,7 @@ func TestWallet_Deposit(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.wallet.Deposit(tt.deposit)
-			if tt.wallet.Balance != Bitcoin(tt.want) {
+			if tt.wallet.Balance != tt.want {
 				t.Errorf("expected %v of amount intead of %v", tt.want, tt.wallet.Balance)
 			}
 		})
@@ -39,8 +38,8 @@ func TestWallet_Deposit(t *testing.T) {
 func TestWallet_Withdraw(t *testing.T) {
 	tests := []struct {
 		wallet        *Wallet
-		want          float64
-		withdraw      float64
+		want          Bitcoin
+		withdraw      Bitcoin
 		name          string
 		expectedError error
 	}{
@@ -52,7 +51,7 @@ func TestWallet_Withdraw(t *testing.T) {
 		},
 		{
 			wallet:        New("Nikita", 1.00),
-			expectedError: errors.New("not enough money to withdraw"),
+			expectedError: AppError,
 			withdraw:      2,
 			name:          "fail:not enough money to withdraw",
 			want:          1,
@@ -61,10 +60,10 @@ func TestWallet_Withdraw(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := tt.wallet.Withdraw(tt.withdraw)
-			if tt.expectedError != nil && tt.expectedError.Error() != err.Error() {
+			if tt.expectedError != err {
 				t.Errorf("expected %v instead of %v", tt.expectedError, err)
 			}
-			if tt.wallet.Balance != Bitcoin(tt.want) {
+			if tt.wallet.Balance != tt.want {
 				t.Errorf("expected %v of amount intead of %v", tt.want, tt.wallet.Balance)
 			}
 		})
@@ -74,8 +73,8 @@ func TestWallet_Withdraw(t *testing.T) {
 func TestWallet_WithdrawConcurrent(t *testing.T) {
 	tests := []struct {
 		wallet        *Wallet
-		want          float64
-		withdraw      float64
+		want          Bitcoin
+		withdraw      Bitcoin
 		name          string
 		expectedError error
 	}{
@@ -87,7 +86,7 @@ func TestWallet_WithdrawConcurrent(t *testing.T) {
 		},
 		{
 			wallet:        New("Nikita", 1.00),
-			expectedError: errors.New("not enough money to withdraw"),
+			expectedError: AppError,
 			withdraw:      2.00,
 			name:          "fail:not enough money to withdraw",
 			want:          1.00,
@@ -96,18 +95,18 @@ func TestWallet_WithdrawConcurrent(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var wg sync.WaitGroup
-			wg.Add(3)
 			for i := 0; i < 3; i++ {
+				wg.Add(1)
 				go func() {
 					err := tt.wallet.Withdraw(tt.withdraw)
-					if tt.expectedError != nil && tt.expectedError.Error() != err.Error() {
+					if tt.expectedError != err {
 						t.Errorf("expected %v instead of %v", tt.expectedError, err)
 					}
 					defer wg.Done()
 				}()
 			}
 			wg.Wait()
-			if tt.wallet.Balance != Bitcoin(tt.want) {
+			if tt.wallet.Balance != tt.want {
 				t.Errorf("expected %v of amount intead of %v", tt.want, tt.wallet.Balance)
 			}
 		})
@@ -117,8 +116,8 @@ func TestWallet_WithdrawConcurrent(t *testing.T) {
 func TestWallet_DepositConcurrent(t *testing.T) {
 	tests := []struct {
 		wallet  *Wallet
-		want    float64
-		deposit float64
+		want    Bitcoin
+		deposit Bitcoin
 		name    string
 	}{
 		{
@@ -131,15 +130,15 @@ func TestWallet_DepositConcurrent(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var wg sync.WaitGroup
-			wg.Add(3)
 			for i := 0; i < 3; i++ {
+				wg.Add(1)
 				go func() {
 					tt.wallet.Deposit(tt.deposit)
 					defer wg.Done()
 				}()
 			}
 			wg.Wait()
-			if tt.wallet.Balance != Bitcoin(tt.want) {
+			if tt.wallet.Balance != tt.want {
 				t.Errorf("expected %v of amount instead of %v", tt.want, tt.wallet.Balance)
 			}
 		})
@@ -149,8 +148,8 @@ func TestWallet_DepositConcurrent(t *testing.T) {
 func ExampleWallet_Deposit() {
 	tests := []struct {
 		wallet  *Wallet
-		want    float64
-		deposit float64
+		want    Bitcoin
+		deposit Bitcoin
 	}{
 		{
 			wallet:  New("Nikita", 1.00),
@@ -168,8 +167,8 @@ func ExampleWallet_Deposit() {
 func ExampleWallet_Withdraw() {
 	tests := []struct {
 		wallet   *Wallet
-		want     float64
-		withdraw float64
+		want     Bitcoin
+		withdraw Bitcoin
 	}{
 		{
 			wallet:   New("Nikita", 1.00),

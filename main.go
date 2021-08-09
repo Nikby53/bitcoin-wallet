@@ -1,57 +1,12 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"sync"
+	"github.com/Nikby53/bitcoin-wallet/wallet"
 )
 
-// Bitcoin type based on float64.
-type Bitcoin float64
-
-// Wallet is a type that allows the deposit
-// and withdraw operations.
-type Wallet struct {
-	User    string
-	Balance Bitcoin
-	mutex   *sync.Mutex
-}
-
-// Withdraw method implements withdraw realisation.
-func (w *Wallet) Withdraw(amount float64) error {
-	w.mutex.Lock()
-	defer w.mutex.Unlock()
-	if w.Balance-Bitcoin(amount) < 0 {
-		return errors.New("not enough money to withdraw")
-	}
-	w.Balance -= Bitcoin(amount)
-	return nil
-}
-
-// Deposit method implements deposit realisation.
-func (w *Wallet) Deposit(amount float64) {
-	w.mutex.Lock()
-	defer w.mutex.Unlock()
-	w.Balance += Bitcoin(amount)
-}
-
-func (w *Wallet) ShowBalance() string {
-	return fmt.Sprintf("user %v balance is %g bitcoin \n", w.User, w.Balance)
-}
-
-// New function is a constructor for Wallet.
-// New function returns wallet with initialized mutex
-// and with some additional fields provided.
-func New(name string, balance Bitcoin) *Wallet {
-	return &Wallet{
-		User:    name,
-		Balance: balance,
-		mutex:   new(sync.Mutex),
-	}
-}
-
 // showMenu shows an interactive menu for the user.
-func showMenu(w *Wallet) {
+func showMenu(w *wallet.Wallet) {
 	for {
 		var input int
 		fmt.Printf("1. Amount \n")
@@ -66,16 +21,16 @@ func showMenu(w *Wallet) {
 		case 1:
 			fmt.Println(w.ShowBalance())
 		case 2:
-			var dep float64
+			var dep wallet.Bitcoin
 			fmt.Printf("enter the deposit amount »")
 			_, err := fmt.Scanln(&dep)
 			if err != nil {
 				fmt.Println("Incorrect input")
 			}
 			w.Deposit(dep)
-			fmt.Printf("Depositing %g bitcoin \n", dep)
+
 		case 3:
-			var with float64
+			var with wallet.Bitcoin
 			fmt.Printf("enter the amount »")
 			_, err := fmt.Scanln(&with)
 			if err != nil {
@@ -95,6 +50,6 @@ func showMenu(w *Wallet) {
 }
 
 func main() {
-	var w = New("Nikita", 1.00)
+	var w = wallet.New("Nikita", 0.00)
 	showMenu(w)
 }
