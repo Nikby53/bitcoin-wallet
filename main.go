@@ -15,7 +15,7 @@ func showMenu(w *wallet.Wallet) {
 		fmt.Printf("4. Exit \n")
 		_, err := fmt.Scanln(&input)
 		if err != nil {
-			fmt.Println(wallet.IncorrectInput)
+			fmt.Println(wallet.ErrIncorrectInput)
 		}
 		switch input {
 		case 1:
@@ -25,11 +25,12 @@ func showMenu(w *wallet.Wallet) {
 			fmt.Printf("enter the deposit amount »")
 			_, err := fmt.Scanln(&dep)
 			if err != nil {
-				fmt.Println(wallet.IncorrectInput)
+				fmt.Println(wallet.ErrIncorrectInput)
 			}
+			fmt.Printf("Depositing %s  \n", dep)
 			err = w.Deposit(dep)
 			if err != nil {
-				fmt.Println(wallet.IncorrectInput)
+				fmt.Println(wallet.ErrIncorrectInput)
 			}
 
 		case 3:
@@ -37,7 +38,7 @@ func showMenu(w *wallet.Wallet) {
 			fmt.Printf("enter the amount »")
 			_, err := fmt.Scanln(&with)
 			if err != nil {
-				fmt.Println(wallet.IncorrectInput)
+				fmt.Println(wallet.ErrIncorrectInput)
 			}
 			err = w.Withdraw(with)
 			if err != nil {

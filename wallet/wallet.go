@@ -6,11 +6,11 @@ import (
 	"sync"
 )
 
-// NotEnoughMoneyToWithdraw custom error.
-var NotEnoughMoneyToWithdraw = errors.New("not enough money to withdraw")
+// ErrNotEnoughMoneyToWithdraw custom error.
+var ErrNotEnoughMoneyToWithdraw = errors.New("not enough money to withdraw")
 
-// IncorrectInput custom error.
-var IncorrectInput = errors.New("incorrect input")
+// ErrIncorrectInput custom error.
+var ErrIncorrectInput = errors.New("incorrect input")
 
 // Bitcoin type based on float64.
 type Bitcoin float64
@@ -36,10 +36,10 @@ func (w *Wallet) Withdraw(amount Bitcoin) error {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 	if amount <= 0 {
-		return IncorrectInput
+		return ErrIncorrectInput
 	}
 	if w.Balance-amount < 0 {
-		return NotEnoughMoneyToWithdraw
+		return ErrNotEnoughMoneyToWithdraw
 	}
 	w.Balance -= amount
 	return nil
@@ -50,9 +50,8 @@ func (w *Wallet) Deposit(amount Bitcoin) error {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 	if amount <= 0 {
-		return IncorrectInput
+		return ErrIncorrectInput
 	}
-	fmt.Printf("Depositing %s  \n", amount)
 	w.Balance += amount
 	return nil
 }

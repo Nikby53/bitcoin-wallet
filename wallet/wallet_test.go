@@ -55,7 +55,7 @@ func TestWallet_Withdraw(t *testing.T) {
 		},
 		{
 			wallet:        New("Nikita", 1.00),
-			expectedError: NotEnoughMoneyToWithdraw,
+			expectedError: ErrNotEnoughMoneyToWithdraw,
 			withdraw:      2,
 			name:          "fail:not enough money to withdraw",
 			want:          1,
@@ -90,7 +90,7 @@ func TestWallet_WithdrawConcurrent(t *testing.T) {
 		},
 		{
 			wallet:        New("Nikita", 1.00),
-			expectedError: NotEnoughMoneyToWithdraw,
+			expectedError: ErrNotEnoughMoneyToWithdraw,
 			withdraw:      2.00,
 			name:          "fail:not enough money to withdraw",
 			want:          1.00,
@@ -139,7 +139,7 @@ func TestWallet_DepositConcurrent(t *testing.T) {
 				go func() {
 					err := tt.wallet.Deposit(tt.deposit)
 					if err != nil {
-						fmt.Println(IncorrectInput)
+						fmt.Println(ErrIncorrectInput)
 					}
 					defer wg.Done()
 				}()
@@ -153,45 +153,17 @@ func TestWallet_DepositConcurrent(t *testing.T) {
 }
 
 func ExampleWallet_Deposit() {
-	tests := []struct {
-		wallet  *Wallet
-		want    Bitcoin
-		deposit Bitcoin
-	}{
-		{
-			wallet:  New("Nikita", 1.00),
-			want:    5.32,
-			deposit: 4.32,
-		},
-	}
-	for _, tt := range tests {
-		err := tt.wallet.Deposit(tt.deposit)
-		if err != nil {
-			fmt.Println(IncorrectInput)
-		}
-		// Output:
-		// 5.32
-	}
+	wallet := New("Nikita", 0.00)
+	_ = wallet.Deposit(2)
+	fmt.Println(wallet)
+	// Output:
+	// User "Nikita" balance is 2.0000 BTC
 }
 
 func ExampleWallet_Withdraw() {
-	tests := []struct {
-		wallet   *Wallet
-		want     Bitcoin
-		withdraw Bitcoin
-	}{
-		{
-			wallet:   New("Nikita", 1.00),
-			want:     0.50,
-			withdraw: 0.50,
-		},
-	}
-	for _, tt := range tests {
-		err := tt.wallet.Withdraw(tt.withdraw)
-		if err != nil {
-			fmt.Println(IncorrectInput)
-		}
-		// Output:
-		// 0.50
-	}
+	wallet := New("Nikita", 2.00)
+	_ = wallet.Withdraw(1)
+	fmt.Println(wallet)
+	// Output:
+	// User "Nikita" balance is 1.0000 BTC
 }
