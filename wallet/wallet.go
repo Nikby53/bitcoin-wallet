@@ -58,8 +58,8 @@ func (w *Wallet) Deposit(amount Bitcoin) error {
 
 // ShowBalance method return String method
 // and shows menu.
-func (w *Wallet) ShowBalance() string {
-	return w.String()
+func (w *Wallet) ShowBalance() Bitcoin {
+	return w.Balance
 }
 
 // New function is a constructor for Wallet.
