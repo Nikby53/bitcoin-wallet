@@ -6,29 +6,30 @@ import (
 	"sync"
 )
 
-// ErrNotEnoughMoneyToWithdraw custom error.
-var ErrNotEnoughMoneyToWithdraw = errors.New("not enough money to withdraw")
-
-// ErrIncorrectInput custom error.
-var ErrIncorrectInput = errors.New("incorrect input")
+var (
+	// ErrInsufficientFunds custom error.
+	ErrInsufficientFunds = errors.New("insufficient funds")
+	// ErrIncorrectInput custom error.
+	ErrIncorrectInput = errors.New("incorrect input")
+)
 
 // Bitcoin type based on float64.
 type Bitcoin float64
-
-// Wallet is a type that allows the deposit
-// and withdraw operations.
-type Wallet struct {
-	User    string
-	Balance Bitcoin
-	mutex   *sync.Mutex
-}
 
 func (b Bitcoin) String() string {
 	return fmt.Sprintf("%.4f BTC", b)
 }
 
-func (w Wallet) String() string {
-	return fmt.Sprintf("User %q balance is %s", w.User, w.Balance)
+// Wallet is a type that allows the deposit
+// and withdraw operations.
+type Wallet struct {
+	user    string
+	balance Bitcoin
+	mutex   sync.RWMutex
+}
+
+func (w *Wallet) String() string {
+	return fmt.Sprintf("User %q balance is %s", w.user, w.balance)
 }
 
 // Withdraw method implements withdraw realisation.
@@ -38,10 +39,10 @@ func (w *Wallet) Withdraw(amount Bitcoin) error {
 	if amount <= 0 {
 		return ErrIncorrectInput
 	}
-	if w.Balance-amount < 0 {
-		return ErrNotEnoughMoneyToWithdraw
+	if w.balance-amount < 0 {
+		return ErrInsufficientFunds
 	}
-	w.Balance -= amount
+	w.balance -= amount
 	return nil
 }
 
@@ -52,14 +53,15 @@ func (w *Wallet) Deposit(amount Bitcoin) error {
 	if amount <= 0 {
 		return ErrIncorrectInput
 	}
-	w.Balance += amount
+	w.balance += amount
 	return nil
 }
 
-// ShowBalance method return String method
-// and shows menu.
-func (w *Wallet) ShowBalance() Bitcoin {
-	return w.Balance
+// Balance method return a String method.
+func (w *Wallet) Balance() Bitcoin {
+	w.mutex.RLock()
+	defer w.mutex.RUnlock()
+	return w.balance
 }
 
 // New function is a constructor for Wallet.
@@ -67,8 +69,7 @@ func (w *Wallet) ShowBalance() Bitcoin {
 // and with some additional fields provided.
 func New(name string, balance Bitcoin) *Wallet {
 	return &Wallet{
-		User:    name,
-		Balance: balance,
-		mutex:   new(sync.Mutex),
+		user:    name,
+		balance: balance,
 	}
 }

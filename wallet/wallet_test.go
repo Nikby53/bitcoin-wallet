@@ -34,8 +34,8 @@ func TestWallet_Deposit(t *testing.T) {
 			if tt.expectedError != err {
 				t.Errorf("expected %v instead of %v", tt.expectedError, err)
 			}
-			if tt.wallet.Balance != tt.want {
-				t.Errorf("expected %v of amount intead of %v", tt.want, tt.wallet.Balance)
+			if tt.wallet.balance != tt.want {
+				t.Errorf("expected %v of amount intead of %v", tt.want, tt.wallet.balance)
 			}
 		})
 	}
@@ -57,7 +57,7 @@ func TestWallet_Withdraw(t *testing.T) {
 		},
 		{
 			wallet:        New("Nikita", 1.00),
-			expectedError: ErrNotEnoughMoneyToWithdraw,
+			expectedError: ErrInsufficientFunds,
 			withdraw:      2,
 			name:          "fail:not enough money to withdraw",
 			want:          1,
@@ -69,8 +69,8 @@ func TestWallet_Withdraw(t *testing.T) {
 			if tt.expectedError != err {
 				t.Errorf("expected %v instead of %v", tt.expectedError, err)
 			}
-			if tt.wallet.Balance != tt.want {
-				t.Errorf("expected %v of amount intead of %v", tt.want, tt.wallet.Balance)
+			if tt.wallet.balance != tt.want {
+				t.Errorf("expected %v of amount intead of %v", tt.want, tt.wallet.balance)
 			}
 		})
 	}
@@ -92,7 +92,7 @@ func TestWallet_WithdrawConcurrent(t *testing.T) {
 		},
 		{
 			wallet:        New("Nikita", 1.00),
-			expectedError: ErrNotEnoughMoneyToWithdraw,
+			expectedError: ErrInsufficientFunds,
 			withdraw:      2.00,
 			name:          "fail:not enough money to withdraw",
 			want:          1.00,
@@ -112,8 +112,8 @@ func TestWallet_WithdrawConcurrent(t *testing.T) {
 				}()
 			}
 			wg.Wait()
-			if tt.wallet.Balance != tt.want {
-				t.Errorf("expected %v of amount intead of %v", tt.want, tt.wallet.Balance)
+			if tt.wallet.balance != tt.want {
+				t.Errorf("expected %v of amount intead of %v", tt.want, tt.wallet.balance)
 			}
 		})
 	}
@@ -147,8 +147,8 @@ func TestWallet_DepositConcurrent(t *testing.T) {
 				}()
 			}
 			wg.Wait()
-			if tt.wallet.Balance != tt.want {
-				t.Errorf("expected %v of amount instead of %v", tt.want, tt.wallet.Balance)
+			if tt.wallet.balance != tt.want {
+				t.Errorf("expected %v of amount instead of %v", tt.want, tt.wallet.balance)
 			}
 		})
 	}
@@ -191,8 +191,8 @@ func TestWallet_DepositAndWithdrawConcurrent(t *testing.T) {
 				}()
 			}
 			wg.Wait()
-			if tt.wallet.Balance != tt.want {
-				t.Errorf("expected %v of amount intead of %v", tt.want, tt.wallet.Balance)
+			if tt.wallet.balance != tt.want {
+				t.Errorf("expected %v of amount intead of %v", tt.want, tt.wallet.balance)
 			}
 		})
 	}
