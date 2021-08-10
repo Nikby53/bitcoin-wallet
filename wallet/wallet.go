@@ -20,7 +20,7 @@ func (b Bitcoin) String() string {
 	return fmt.Sprintf("%.4f BTC", b)
 }
 
-// Wallet is a type that allows the deposit
+// Wallet is a type that allows the deposit, balance
 // and withdraw operations.
 type Wallet struct {
 	user    string

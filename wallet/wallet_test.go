@@ -1,6 +1,7 @@
 package wallet
 
 import (
+	"errors"
 	"fmt"
 	"sync"
 	"testing"
@@ -66,7 +67,7 @@ func TestWallet_Withdraw(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := tt.wallet.Withdraw(tt.withdraw)
-			if tt.expectedError != err {
+			if err != tt.expectedError {
 				t.Errorf("expected %v instead of %v", tt.expectedError, err)
 			}
 			if tt.wallet.balance != tt.want {
@@ -121,16 +122,18 @@ func TestWallet_WithdrawConcurrent(t *testing.T) {
 
 func TestWallet_DepositConcurrent(t *testing.T) {
 	tests := []struct {
-		wallet  *Wallet
-		want    Bitcoin
-		deposit Bitcoin
-		name    string
+		wallet        *Wallet
+		want          Bitcoin
+		deposit       Bitcoin
+		name          string
+		expectedError error
 	}{
 		{
-			wallet:  New("Nikita", 1.00),
-			want:    7.00,
-			deposit: 2.00,
-			name:    "success",
+			wallet:        New("Nikita", 1.00),
+			want:          7.00,
+			deposit:       2.00,
+			expectedError: ErrIncorrectInput,
+			name:          "success",
 		},
 	}
 	for _, tt := range tests {
@@ -140,8 +143,8 @@ func TestWallet_DepositConcurrent(t *testing.T) {
 				wg.Add(1)
 				go func() {
 					err := tt.wallet.Deposit(tt.deposit)
-					if err != nil {
-						fmt.Println(ErrIncorrectInput)
+					if errors.Is(err, tt.expectedError) {
+						t.Errorf("expected %v instead of %v", tt.expectedError, err)
 					}
 					defer wg.Done()
 				}()
@@ -156,18 +159,20 @@ func TestWallet_DepositConcurrent(t *testing.T) {
 
 func TestWallet_DepositAndWithdrawConcurrent(t *testing.T) {
 	tests := []struct {
-		wallet   *Wallet
-		want     Bitcoin
-		withdraw Bitcoin
-		deposit  Bitcoin
-		name     string
+		wallet        *Wallet
+		want          Bitcoin
+		withdraw      Bitcoin
+		deposit       Bitcoin
+		name          string
+		expectedError error
 	}{
 		{
-			wallet:   New("Nikita", 5.00),
-			want:     8.00,
-			withdraw: 1.00,
-			deposit:  2.00,
-			name:     "success",
+			wallet:        New("Nikita", 5.00),
+			want:          8.00,
+			withdraw:      1.00,
+			deposit:       2.00,
+			expectedError: ErrIncorrectInput,
+			name:          "success",
 		},
 	}
 	for _, tt := range tests {
@@ -178,8 +183,8 @@ func TestWallet_DepositAndWithdrawConcurrent(t *testing.T) {
 				go func() {
 					defer wg.Done()
 					err := tt.wallet.Withdraw(tt.withdraw)
-					if err != nil {
-						t.Errorf("no error expected but got %v", err)
+					if errors.Is(err, tt.expectedError) {
+						t.Errorf("expected %v instead of %v", tt.expectedError, err)
 					}
 				}()
 				go func() {
