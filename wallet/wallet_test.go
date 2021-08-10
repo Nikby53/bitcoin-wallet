@@ -8,10 +8,11 @@ import (
 
 func TestWallet_Deposit(t *testing.T) {
 	tests := []struct {
-		wallet  *Wallet
-		want    Bitcoin
-		deposit Bitcoin
-		name    string
+		wallet        *Wallet
+		want          Bitcoin
+		deposit       Bitcoin
+		name          string
+		expectedError error
 	}{
 		{
 			wallet:  New("Nikita", 1.00),
@@ -20,17 +21,18 @@ func TestWallet_Deposit(t *testing.T) {
 			name:    "success",
 		},
 		{
-			wallet:  New("Nikita", 1.00),
-			want:    1.00,
-			deposit: 0.00,
-			name:    "success",
+			wallet:        New("Nikita", 1.00),
+			want:          1.00,
+			expectedError: ErrIncorrectInput,
+			deposit:       -1.00,
+			name:          "fail: incorrect input",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := tt.wallet.Deposit(tt.deposit)
-			if err != nil {
-				fmt.Println(err)
+			if tt.expectedError != err {
+				t.Errorf("expected %v instead of %v", tt.expectedError, err)
 			}
 			if tt.wallet.Balance != tt.want {
 				t.Errorf("expected %v of amount intead of %v", tt.want, tt.wallet.Balance)
