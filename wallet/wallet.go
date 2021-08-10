@@ -57,7 +57,7 @@ func (w *Wallet) Deposit(amount Bitcoin) error {
 	return nil
 }
 
-// Balance method returns a String method.
+// Balance method returns a String method .
 func (w *Wallet) Balance() Bitcoin {
 	w.mutex.RLock()
 	defer w.mutex.RUnlock()
