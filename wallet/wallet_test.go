@@ -152,6 +152,50 @@ func TestWallet_DepositConcurrent(t *testing.T) {
 	}
 }
 
+func TestWallet_DepositAndWithdrawConcurrent(t *testing.T) {
+	tests := []struct {
+		wallet   *Wallet
+		want     Bitcoin
+		withdraw Bitcoin
+		deposit  Bitcoin
+		name     string
+	}{
+		{
+			wallet:   New("Nikita", 5.00),
+			want:     8.00,
+			withdraw: 1.00,
+			deposit:  2.00,
+			name:     "success",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var wg sync.WaitGroup
+			for i := 0; i < 3; i++ {
+				wg.Add(2)
+				go func() {
+					defer wg.Done()
+					err := tt.wallet.Withdraw(tt.withdraw)
+					if err != nil {
+						t.Errorf("no error expected but got %v", err)
+					}
+				}()
+				go func() {
+					defer wg.Done()
+					err := tt.wallet.Deposit(tt.deposit)
+					if err != nil {
+						t.Errorf("no error expected but got %v", err)
+					}
+				}()
+			}
+			wg.Wait()
+			if tt.wallet.Balance != tt.want {
+				t.Errorf("expected %v of amount intead of %v", tt.want, tt.wallet.Balance)
+			}
+		})
+	}
+}
+
 func ExampleWallet_Deposit() {
 	wallet := New("Nikita", 0.00)
 	_ = wallet.Deposit(2)
