@@ -32,7 +32,7 @@ func TestWallet_Deposit(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := tt.wallet.Deposit(tt.deposit)
-			if tt.expectedError != err {
+			if !errors.Is(err, tt.expectedError) {
 				t.Errorf("expected %v instead of %v", tt.expectedError, err)
 			}
 			if tt.wallet.balance != tt.want {
@@ -67,7 +67,7 @@ func TestWallet_Withdraw(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := tt.wallet.Withdraw(tt.withdraw)
-			if err != tt.expectedError {
+			if !errors.Is(err, tt.expectedError) {
 				t.Errorf("expected %v instead of %v", tt.expectedError, err)
 			}
 			if tt.wallet.balance != tt.want {
@@ -106,7 +106,7 @@ func TestWallet_WithdrawConcurrent(t *testing.T) {
 				wg.Add(1)
 				go func() {
 					err := tt.wallet.Withdraw(tt.withdraw)
-					if tt.expectedError != err {
+					if !errors.Is(err, tt.expectedError) {
 						t.Errorf("expected %v instead of %v", tt.expectedError, err)
 					}
 					defer wg.Done()

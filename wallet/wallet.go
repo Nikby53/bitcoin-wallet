@@ -37,10 +37,10 @@ func (w *Wallet) Withdraw(amount Bitcoin) error {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 	if amount <= 0 {
-		return ErrIncorrectInput
+		return fmt.Errorf("%v, %w", amount, ErrIncorrectInput)
 	}
 	if w.balance-amount < 0 {
-		return ErrInsufficientFunds
+		return fmt.Errorf("%v, %w", amount, ErrInsufficientFunds)
 	}
 	w.balance -= amount
 	return nil
@@ -51,7 +51,7 @@ func (w *Wallet) Deposit(amount Bitcoin) error {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 	if amount <= 0 {
-		return ErrIncorrectInput
+		return fmt.Errorf("%v, %w", amount, ErrIncorrectInput)
 	}
 	w.balance += amount
 	return nil
